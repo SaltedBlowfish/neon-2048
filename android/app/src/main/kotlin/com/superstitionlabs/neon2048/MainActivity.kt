@@ -1,4 +1,4 @@
-package dev.palazzetti.free_2048
+package com.superstitionlabs.neon2048
 
 import io.flutter.embedding.android.FlutterActivity
 
