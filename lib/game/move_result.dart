@@ -20,9 +20,16 @@ class TileMove {
 /// Cell indices are opaque integers — each mode's logic file owns the mapping
 /// between an index and a 2D coord (row/col for square, axial q/r for hex).
 class MoveResult {
+  /// The grid after sliding and merging (0 = empty).
   final List<int> grid;
+
+  /// Every tile that was on the board and where it travelled.
   final List<TileMove> moves;
+
+  /// Cell indices that received a freshly merged tile.
   final List<int> mergedCells;
+
+  /// Points earned — the sum of every merged tile's new value.
   final int gained;
 
   const MoveResult({
