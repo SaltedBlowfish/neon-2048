@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:free_2048/game/hex_logic.dart';
 
@@ -188,6 +190,75 @@ void main() {
       expect(result.grid[axialToIndex(2, 0)!], 9);
       expect(result.grid[axialToIndex(1, 1)!], 27);
       expect(result.gained, 9 + 27);
+    });
+  });
+
+  group('spawnHexTile', () {
+    test('returns null on a full board', () {
+      final grid = List<int>.filled(kHexCellCount, 3);
+      expect(spawnHexTile(grid, Random(0)), isNull);
+    });
+
+    test('places exactly one tile of value 3 or 9 in an empty cell', () {
+      final grid = emptyHexGrid();
+      final idx = spawnHexTile(grid, Random(0));
+      expect(idx, isNotNull);
+      expect(grid[idx!] == 3 || grid[idx] == 9, isTrue);
+      // No other cell touched.
+      expect(grid.where((v) => v != 0).length, 1);
+    });
+
+    test('spawns value 9 roughly 10% of the time over many trials', () {
+      final random = Random(42);
+      var nines = 0;
+      const trials = 5000;
+      for (var t = 0; t < trials; t++) {
+        final grid = emptyHexGrid();
+        final idx = spawnHexTile(grid, random)!;
+        if (grid[idx] == 9) nines++;
+      }
+      // 10% ± 2% wide band — generous to avoid flakiness.
+      expect(nines / trials, closeTo(0.10, 0.02));
+    });
+  });
+
+  group('canHexMove', () {
+    test('true when any cell is empty', () {
+      expect(canHexMove(emptyHexGrid()), isTrue);
+    });
+
+    test('true on a full board with at least one adjacent equal pair', () {
+      // Fill every cell with 3 — adjacent pairs everywhere.
+      final grid = List<int>.filled(kHexCellCount, 3);
+      expect(canHexMove(grid), isTrue);
+    });
+
+    test('false on a full board with no adjacent equal pairs', () {
+      // Hand-crafted: fill cells with alternating values whose neighbours never
+      // match. Easiest construction: use 3, 9, 27 in a pattern keyed on
+      // (q + 2r) mod 3.
+      final grid = emptyHexGrid();
+      const palette = [3, 9, 27];
+      for (var i = 0; i < kHexCellCount; i++) {
+        final c = indexToAxial(i);
+        grid[i] = palette[((c.q + 2 * c.r) % 3 + 3) % 3];
+      }
+      // Sanity check: this construction really is full.
+      expect(grid.contains(0), isFalse);
+      expect(canHexMove(grid), isFalse);
+    });
+  });
+
+  group('highestHexTile', () {
+    test('returns 0 for an empty board', () {
+      expect(highestHexTile(emptyHexGrid()), 0);
+    });
+
+    test('returns the largest value on the board', () {
+      final grid = emptyHexGrid();
+      grid[axialToIndex(0, 0)!] = 81;
+      grid[axialToIndex(1, 0)!] = 9;
+      expect(highestHexTile(grid), 81);
     });
   });
 }

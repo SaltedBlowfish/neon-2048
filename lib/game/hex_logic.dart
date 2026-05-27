@@ -1,4 +1,5 @@
-// Pure hex-board logic for 2187 mode — no Flutter. Everything here is
+// Pure hex-board logic for 2187 mode — no Flutter, no side effects (except
+// `spawnHexTile`, which is documented as mutating). Everything here is
 // unit-tested.
 
 import 'dart:math';
@@ -185,3 +186,45 @@ List<List<int>> _buildTravelLines(HexDirection dir) {
   return List<List<int>>.unmodifiable(
       lines.map((l) => List<int>.unmodifiable(l)));
 }
+
+/// Values that can appear when a new tile spawns in 2187 mode.
+const List<int> kHex2187SpawnValues = [3, 9];
+
+/// Places a new tile in a random empty cell of [grid] (mutating it) and
+/// returns that cell's index, or null if the grid is full. New tiles are a 3
+/// 90% of the time and a 9 the other 10%.
+int? spawnHexTile(List<int> grid, Random random) {
+  final empties = emptyHexCells(grid);
+  if (empties.isEmpty) return null;
+  final index = empties[random.nextInt(empties.length)];
+  grid[index] = random.nextInt(10) == 0 ? 9 : 3;
+  return index;
+}
+
+/// True while at least one legal move remains.
+bool canHexMove(List<int> grid) {
+  if (grid.contains(0)) return true;
+  // Check every cell's six axial neighbours for an equal value. Each unordered
+  // pair is visited twice but that's cheap on a 19-cell board.
+  const offsets = [
+    [1, 0],
+    [-1, 0],
+    [1, -1],
+    [-1, 1],
+    [0, 1],
+    [0, -1],
+  ];
+  for (var i = 0; i < kHexCellCount; i++) {
+    final c = indexToAxial(i);
+    final v = grid[i];
+    for (final off in offsets) {
+      final n = axialToIndex(c.q + off[0], c.r + off[1]);
+      if (n != null && grid[n] == v) return true;
+    }
+  }
+  return false;
+}
+
+/// The largest tile value currently on the board.
+int highestHexTile(List<int> grid) =>
+    grid.fold(0, (best, v) => v > best ? v : best);
