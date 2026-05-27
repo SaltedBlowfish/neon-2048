@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../game/game_mode.dart';
+
 /// The neon visual identity: deep-space background, neon cyan grid, and tiles
 /// that glow brighter the larger they get.
 class NeonTheme {
@@ -22,8 +24,18 @@ class NeonTheme {
   static const Color danger = Color(0xFFFF4D6D); // game-over accent
   static const Color textDim = Color(0xFF6F93A6);
 
-  /// Per-value tile styling — a dim slate-blue 2 climbing to a white-hot 2048.
-  static TileStyle styleFor(int value) {
+  /// Per-value tile styling dispatched by [GameMode].
+  static TileStyle styleFor(GameMode mode, int value) {
+    switch (mode) {
+      case GameMode.mode2048:
+        return _styleFor2048(value);
+      case GameMode.mode2187:
+        return _styleFor2187(value);
+    }
+  }
+
+  /// Cyan ramp — dim slate-blue 2 climbing to a white-hot 2048.
+  static TileStyle _styleFor2048(int value) {
     switch (value) {
       case 2:
         return const TileStyle(Color(0xFF0E2236), Color(0xFF3D6E88), 0.22);
@@ -49,6 +61,30 @@ class NeonTheme {
         return const TileStyle(Color(0xFF177084), Color(0xFFEAFBFF), 1.48);
       default:
         return const TileStyle(Color(0xFF1C7A86), Color(0xFFEAFBFF), 1.6);
+    }
+  }
+
+  // Red ramp for 2187 mode. Crimson at the low end → hot pink at the top.
+  // Kept distinct from the `danger` accent so the game-over banner remains
+  // visually separable.
+  static TileStyle _styleFor2187(int value) {
+    switch (value) {
+      case 3:
+        return const TileStyle(Color(0xFF360E1B), Color(0xFF88406A), 0.22);
+      case 9:
+        return const TileStyle(Color(0xFF45112B), Color(0xFFB8497A), 0.30);
+      case 27:
+        return const TileStyle(Color(0xFF55143A), Color(0xFFDC4C8C), 0.42);
+      case 81:
+        return const TileStyle(Color(0xFF63174A), Color(0xFFEC4FA0), 0.56);
+      case 243:
+        return const TileStyle(Color(0xFF701A5A), Color(0xFFF252B6), 0.72);
+      case 729:
+        return const TileStyle(Color(0xFF7A1D6A), Color(0xFFFF5AC8), 0.92);
+      case 2187:
+        return const TileStyle(Color(0xFF84207A), Color(0xFFFFB1E4), 1.16);
+      default:
+        return const TileStyle(Color(0xFF86238E), Color(0xFFFFB1E4), 1.3);
     }
   }
 

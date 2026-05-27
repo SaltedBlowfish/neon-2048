@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../game/game_mode.dart';
 import '../game/tile.dart';
 import '../theme/neon_theme.dart';
 import 'board_metrics.dart';
@@ -13,6 +14,7 @@ class BoardView extends StatelessWidget {
   final List<Tile> tiles;
   final Animation<double> move;
   final Animation<double> ambient;
+  final GameMode mode;
 
   const BoardView({
     super.key,
@@ -20,6 +22,7 @@ class BoardView extends StatelessWidget {
     required this.tiles,
     required this.move,
     required this.ambient,
+    required this.mode,
   });
 
   @override
@@ -41,6 +44,7 @@ class BoardView extends StatelessWidget {
               tile: tile,
               metrics: metrics,
               move: move,
+              mode: mode,
             ),
         ],
       ),
@@ -53,12 +57,14 @@ class TileView extends StatelessWidget {
   final Tile tile;
   final BoardMetrics metrics;
   final Animation<double> move;
+  final GameMode mode;
 
   const TileView({
     super.key,
     required this.tile,
     required this.metrics,
     required this.move,
+    required this.mode,
   });
 
   /// Fraction of the move animation spent sliding; the rest is for pops.
@@ -68,7 +74,7 @@ class TileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: move,
-      child: _TileBox(value: tile.value, cell: metrics.cell),
+      child: _TileBox(value: tile.value, cell: metrics.cell, mode: mode),
       builder: (context, child) {
         final t = move.value;
         final slide =
@@ -110,8 +116,9 @@ class TileView extends StatelessWidget {
 class _TileBox extends StatelessWidget {
   final int value;
   final double cell;
+  final GameMode mode;
 
-  const _TileBox({required this.value, required this.cell});
+  const _TileBox({required this.value, required this.cell, required this.mode});
 
   double get _fontSize {
     final digits = value.toString().length;
@@ -123,7 +130,7 @@ class _TileBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = NeonTheme.styleFor(value);
+    final style = NeonTheme.styleFor(mode, value);
     final glowAlpha = (0.45 * style.glow).clamp(0.0, 0.95);
     return DecoratedBox(
       decoration: BoxDecoration(
