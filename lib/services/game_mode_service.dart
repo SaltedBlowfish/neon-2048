@@ -8,6 +8,8 @@ import '../game/game_mode.dart';
 class GameModeService {
   static const String _key = 'neon2048.activeMode';
 
+  /// Returns the stored mode, or [GameMode.mode2048] if nothing is saved, the
+  /// stored value is unrecognised, or storage is unavailable.
   Future<GameMode> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -18,6 +20,7 @@ class GameModeService {
     }
   }
 
+  /// Stores [mode] so a later [load] returns it.
   Future<void> save(GameMode mode) async {
     try {
       final prefs = await SharedPreferences.getInstance();
