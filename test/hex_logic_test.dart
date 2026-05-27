@@ -174,5 +174,20 @@ void main() {
       expect(result.moves.every((m) => m.merging), isTrue);
       expect(result.moves.every((m) => m.to == axialToIndex(2, 0)), isTrue);
     });
+
+    test('processes multiple travel lines independently in one swipe', () {
+      // Two pairs on two different rows must both merge in a single east
+      // swipe. This catches any bug where `slot` is not reset per line.
+      final grid = hexGridFrom({
+        const Axial(-2, 0): 3,
+        const Axial(-1, 0): 3,
+        const Axial(-2, 1): 9,
+        const Axial(-1, 1): 9,
+      });
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.grid[axialToIndex(2, 0)!], 9);
+      expect(result.grid[axialToIndex(1, 1)!], 27);
+      expect(result.gained, 9 + 27);
+    });
   });
 }
