@@ -98,10 +98,11 @@ def build_icon() -> Path:
     d.rounded_rectangle(tile, radius=radius, fill=PANEL + (255,))
     d.rounded_rectangle(tile, radius=radius, outline=NEON + (255,), width=10)
 
-    # Big glowing "2".
-    font = load_font(int(tile_w * 0.62), weight=900)
-    cx, cy = size // 2, size // 2 + 14  # tiny optical drop for visual centering
-    draw_glow_text(img, (cx, cy), "2", font, NEON_HOT, blur=20)
+    # Big glowing "2048" — the brand. 4 digits + Orbitron Black is wide, so
+    # the size factor is much smaller than for a single character.
+    font = load_font(int(tile_w * 0.34), weight=900)
+    cx, cy = size // 2, size // 2 + 8  # tiny optical drop for visual centering
+    draw_glow_text(img, (cx, cy), "2048", font, NEON_HOT, blur=14)
 
     out = OUT_DIR / "icon-512.png"
     img.convert("RGB").save(out, "PNG", optimize=True)
@@ -202,12 +203,176 @@ def build_feature_graphic() -> Path:
     return out
 
 
+def pad_to_9_16(img: Image.Image) -> Image.Image:
+    """Pad an image horizontally with dark bars to make it exactly 9:16.
+
+    Used to take 1080×2400 emulator captures (9:20) up to 1350×2400 (9:16) so
+    they qualify for Play Store promotion eligibility without cropping any
+    in-app content. If the image is already wider than 9:16, pads vertically.
+    """
+    w, h = img.size
+    target_w = int(round(h * 9 / 16))
+    if target_w == w:
+        return img
+    if target_w > w:
+        canvas = Image.new("RGB", (target_w, h), BG_DARK)
+        canvas.paste(img, ((target_w - w) // 2, 0))
+        return canvas
+    target_h = int(round(w * 16 / 9))
+    canvas = Image.new("RGB", (w, target_h), BG_DARK)
+    canvas.paste(img, (0, (target_h - h) // 2))
+    return canvas
+
+
+def crop_screenshots() -> list[Path]:
+    """Pad the in-repo emulator screenshots to exact 9:16 for Play Store."""
+    src_to_out = [
+        ("home.png",        "screenshot-1-home.png"),
+        ("gameplay.png",    "screenshot-2-gameplay.png"),
+        ("high-scores.png", "screenshot-3-high-scores.png"),
+    ]
+    outs: list[Path] = []
+    for src_name, out_name in src_to_out:
+        src = REPO / "screenshots" / src_name
+        if not src.exists():
+            continue
+        padded = pad_to_9_16(Image.open(src).convert("RGB"))
+        out = OUT_DIR / out_name
+        padded.save(out, "PNG", optimize=True)
+        outs.append(out)
+    return outs
+
+
+def build_promo_screenshot() -> Path:
+    """A portrait 1080×1920 promo screenshot mimicking the in-app layout.
+
+    Curated board state showing the tile palette climbing from 2 to 1024,
+    so the listing has a fourth 9:16 image that visibly demonstrates the
+    glow progression in one frame.
+    """
+    w, h = 1080, 1920
+    img = gradient_bg((w, h), BG_DARK, BG_LIGHT)
+    d = ImageDraw.Draw(img)
+
+    # Header — same shape as the in-app screen.
+    eyebrow_font = load_font(28, weight=600)
+    d.text((60, 130), "// NEON GRID", font=eyebrow_font, fill=TEXT_DIM + (255,))
+
+    title_font = load_font(140, weight=900)
+    draw_glow_text(img, (60, 280), "2048", title_font, NEON, blur=22, anchor="lm")
+
+    # Faux score panels (cosmetic — show what the run reached).
+    def score_box(x: int, label: str, value: str, color: tuple[int, int, int]):
+        bw, bh = 460, 130
+        d.rounded_rectangle((x, 400, x + bw, 400 + bh),
+                            radius=20, fill=PANEL + (255,),
+                            outline=color + (140,), width=3)
+        d.text((x + 28, 422), label, font=load_font(20, weight=600),
+               fill=color + (200,))
+        d.text((x + 28, 458), value, font=load_font(46, weight=800),
+               fill=NEON_HOT + (255,))
+
+    score_box(60,  "SCORE", "12,480", NEON)
+    score_box(560, "BEST",  "12,480", (44, 124, 214))  # deep blue
+
+    # Board — same metrics as in-app, just at 880px wide for the portrait.
+    board_size = 960
+    board_x = (w - board_size) // 2
+    board_y = 620
+
+    d.rounded_rectangle((board_x, board_y, board_x + board_size,
+                         board_y + board_size),
+                        radius=40, fill=(5, 11, 20, 255))
+
+    glow_layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ImageDraw.Draw(glow_layer).rounded_rectangle(
+        (board_x, board_y, board_x + board_size, board_y + board_size),
+        radius=40, outline=NEON + (180,), width=10)
+    img.alpha_composite(glow_layer.filter(ImageFilter.GaussianBlur(18)))
+    d.rounded_rectangle((board_x, board_y, board_x + board_size,
+                         board_y + board_size),
+                        radius=40, outline=NEON + (220,), width=4)
+
+    pad = 38
+    gap = 22
+    cell = (board_size - 2 * pad - 3 * gap) // 4
+    for r in range(4):
+        for c in range(4):
+            cx = board_x + pad + c * (cell + gap)
+            cy = board_y + pad + r * (cell + gap)
+            d.rounded_rectangle((cx, cy, cx + cell, cy + cell),
+                                radius=int(cell * 0.16),
+                                fill=EMPTY_CELL + (255,),
+                                outline=NEON_DIM + (140,), width=2)
+
+    # Climbing values — one tile per diagonal-ish cell, showing the gradient.
+    edge_for = {
+        2:    (61, 110, 136),
+        8:    (68, 162, 220),
+        32:   (42, 212, 242),
+        128:  (95, 238, 255),
+        1024: (223, 252, 255),
+    }
+    samples = [(0, 1, 2), (1, 0, 8), (2, 2, 128), (3, 1, 32), (3, 3, 1024)]
+    for r, c, value in samples:
+        x = board_x + pad + c * (cell + gap)
+        y = board_y + pad + r * (cell + gap)
+        edge = edge_for[value]
+        draw_glow_rect(img, (x, y, x + cell, y + cell),
+                       int(cell * 0.16), edge, blur=cell * 0.20, alpha=150)
+        d.rounded_rectangle((x, y, x + cell, y + cell),
+                            radius=int(cell * 0.16),
+                            fill=(14, 30, 50, 255),
+                            outline=edge + (255,), width=4)
+        digits = len(str(value))
+        scale = 0.42 if digits <= 2 else 0.34 if digits == 3 else 0.26
+        fs = int(cell * scale)
+        font = load_font(fs, weight=700)
+        draw_glow_text(img, (x + cell // 2, y + cell // 2 + 4),
+                       str(value), font, edge, blur=cell * 0.08)
+
+    # Footer — match the in-app neon buttons.
+    def button(x: int, label: str, color: tuple[int, int, int], filled: bool):
+        bw, bh = 460, 100
+        bx, by = x, h - 180
+        if filled:
+            # Pillow's rounded_rectangle doesn't alpha-blend with what's
+            # underneath, so we precompute the tint manually — mirrors the
+            # in-app NeonButton's `color.withValues(alpha: 0.18)` over panel.
+            fill = tuple(int(PANEL[i] * 0.80 + color[i] * 0.20)
+                         for i in range(3)) + (255,)
+        else:
+            fill = PANEL + (255,)
+        d.rounded_rectangle((bx, by, bx + bw, by + bh),
+                            radius=20, fill=fill,
+                            outline=color + (220,), width=3)
+        d.text((bx + bw // 2, by + bh // 2 + 2),
+               label, font=load_font(26, weight=700),
+               fill=color + (255,), anchor="mm")
+
+    button(60,  "NEW GAME",    NEON,            filled=True)
+    button(560, "HIGH SCORES", (44, 124, 214),  filled=False)
+
+    out = OUT_DIR / "screenshot-4-promo.png"
+    img.convert("RGB").save(out, "PNG", optimize=True)
+    return out
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     icon = build_icon()
     feature = build_feature_graphic()
+    screenshots = crop_screenshots()
+    promo = build_promo_screenshot()
     print(f"icon:    {icon}  ({icon.stat().st_size // 1024} KB)")
     print(f"feature: {feature}  ({feature.stat().st_size // 1024} KB)")
+    for s in screenshots:
+        with Image.open(s) as im:
+            print(f"shot:    {s}  ({im.size[0]}×{im.size[1]}, "
+                  f"{s.stat().st_size // 1024} KB)")
+    with Image.open(promo) as im:
+        print(f"promo:   {promo}  ({im.size[0]}×{im.size[1]}, "
+              f"{promo.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":

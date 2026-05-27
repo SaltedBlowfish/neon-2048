@@ -71,11 +71,17 @@ Built by Superstition Labs, LLC — Phoenix, Arizona.
 |---|---|---|
 | App icon | 512×512 PNG, opaque | `icon-512.png` |
 | Feature graphic | 1024×500 PNG | `feature-graphic-1024x500.png` |
-| Phone screenshot 1 | portrait PNG | `screenshot-1-home.png` |
-| Phone screenshot 2 | portrait PNG | `screenshot-2-gameplay.png` |
-| Phone screenshot 3 | portrait PNG | `screenshot-3-high-scores.png` |
+| Phone screenshot 1 | 1350×2400 PNG (9:16) | `screenshot-1-home.png` |
+| Phone screenshot 2 | 1350×2400 PNG (9:16) | `screenshot-2-gameplay.png` |
+| Phone screenshot 3 | 1350×2400 PNG (9:16) | `screenshot-3-high-scores.png` |
+| Phone screenshot 4 | 1080×1920 PNG (9:16) | `screenshot-4-promo.png` |
 
-Play Console requires at least 2 phone screenshots; we have 3.
+All four screenshots are exactly 9:16 and ≥1080 px on the short side, which
+satisfies the promotion eligibility rule: *"at least 4 screenshots, with at
+least 3 in 16:9 or 9:16 and at least 1080 px."* Screenshots 1–3 are real
+emulator captures padded with dark bars on the sides to reach 9:16 without
+cropping any UI; screenshot 4 is a synthetic portrait showing the tile
+palette climbing from 2 to 1024.
 
 ---
 
