@@ -76,4 +76,103 @@ void main() {
       expect(centreLine.last, axialToIndex(-2, 0));
     });
   });
+
+  group('applyHexMove', () {
+    // Build a fresh grid with explicit values at given axial coords, zeros
+    // elsewhere. Helper keeps test bodies legible.
+    List<int> hexGridFrom(Map<Axial, int> values) {
+      final grid = emptyHexGrid();
+      values.forEach((coord, value) {
+        final idx = axialToIndex(coord.q, coord.r);
+        if (idx == null) throw ArgumentError('$coord is outside the board');
+        grid[idx] = value;
+      });
+      return grid;
+    }
+
+    test('an empty board is unchanged in every direction', () {
+      for (final dir in HexDirection.values) {
+        final result = applyHexMove(emptyHexGrid(), dir);
+        expect(result.changed, isFalse);
+      }
+    });
+
+    test('a lone tile slides to the eastmost cell on its row', () {
+      final grid = hexGridFrom({const Axial(-2, 0): 3});
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.changed, isTrue);
+      expect(result.gained, 0);
+      // Expect: only (2, 0) holds the 3.
+      expect(result.grid[axialToIndex(2, 0)!], 3);
+      expect(result.grid[axialToIndex(-2, 0)!], 0);
+    });
+
+    test('two equal 3s on the same row merge into a 9 with gained == 9', () {
+      final grid = hexGridFrom({
+        const Axial(-2, 0): 3,
+        const Axial(-1, 0): 3,
+      });
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.changed, isTrue);
+      expect(result.gained, 9);
+      expect(result.grid[axialToIndex(2, 0)!], 9);
+      // Every other cell zero.
+      for (var i = 0; i < kHexCellCount; i++) {
+        if (i == axialToIndex(2, 0)) continue;
+        expect(result.grid[i], 0);
+      }
+    });
+
+    test('three 3s in a row: first two merge, third is stranded one cell back',
+        () {
+      final grid = hexGridFrom({
+        const Axial(-2, 0): 3,
+        const Axial(-1, 0): 3,
+        const Axial(0, 0): 3,
+      });
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.gained, 9);
+      expect(result.grid[axialToIndex(2, 0)!], 9);
+      expect(result.grid[axialToIndex(1, 0)!], 3);
+    });
+
+    test('a freshly-merged tile cannot merge again in the same swipe', () {
+      // 3,3,9,0 swiped east: the two 3s merge into a 9, but that new 9 must
+      // not then merge with the existing 9.
+      final grid = hexGridFrom({
+        const Axial(-2, 0): 3,
+        const Axial(-1, 0): 3,
+        const Axial(0, 0): 9,
+      });
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.grid[axialToIndex(2, 0)!], 9);
+      expect(result.grid[axialToIndex(1, 0)!], 9);
+      expect(result.gained, 9); // only the 3+3 merge contributed
+    });
+
+    test('two pairs on the same line both merge in one swipe', () {
+      // 3,3,9,9 east -> 9,27 (two independent merges).
+      final grid = hexGridFrom({
+        const Axial(-2, 0): 3,
+        const Axial(-1, 0): 3,
+        const Axial(0, 0): 9,
+        const Axial(1, 0): 9,
+      });
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.grid[axialToIndex(2, 0)!], 27);
+      expect(result.grid[axialToIndex(1, 0)!], 9);
+      expect(result.gained, 9 + 27);
+    });
+
+    test('produces TileMoves describing every sliding tile', () {
+      final grid = hexGridFrom({
+        const Axial(-2, 0): 3,
+        const Axial(-1, 0): 3,
+      });
+      final result = applyHexMove(grid, HexDirection.east);
+      expect(result.moves.length, 2);
+      expect(result.moves.every((m) => m.merging), isTrue);
+      expect(result.moves.every((m) => m.to == axialToIndex(2, 0)), isTrue);
+    });
+  });
 }

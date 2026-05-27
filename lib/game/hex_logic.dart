@@ -3,6 +3,8 @@
 
 import 'dart:math';
 
+import 'move_result.dart';
+
 /// Side length of the hexagonal board, in cells from centre to a vertex.
 const int kHexSide = 3;
 
@@ -104,6 +106,50 @@ List<List<int>> hexTravelLines(HexDirection dir) =>
     _travelLineCache.putIfAbsent(dir, () => _buildTravelLines(dir));
 
 final Map<HexDirection, List<List<int>>> _travelLineCache = {};
+
+/// Applies a swipe to [grid] and returns the result. [grid] is never mutated.
+/// Pair-merge mechanic with a ×3 multiplier (3+3 → 9, 9+9 → 27, …).
+MoveResult applyHexMove(List<int> grid, HexDirection dir) {
+  final result = emptyHexGrid();
+  final moves = <TileMove>[];
+  final mergedCells = <int>[];
+  var gained = 0;
+
+  for (final line in hexTravelLines(dir)) {
+    final occupied = [for (final idx in line) if (grid[idx] != 0) idx];
+
+    var slot = 0;
+    var i = 0;
+    while (i < occupied.length) {
+      final src = occupied[i];
+      final value = grid[src];
+      final dest = line[slot];
+      final mergeNext =
+          i + 1 < occupied.length && grid[occupied[i + 1]] == value;
+      if (mergeNext) {
+        moves.add(TileMove(from: src, to: dest, value: value, merging: true));
+        moves.add(TileMove(
+            from: occupied[i + 1], to: dest, value: value, merging: true));
+        result[dest] = value * kHex2187Multiplier;
+        mergedCells.add(dest);
+        gained += value * kHex2187Multiplier;
+        i += 2;
+      } else {
+        moves.add(TileMove(from: src, to: dest, value: value, merging: false));
+        result[dest] = value;
+        i += 1;
+      }
+      slot++;
+    }
+  }
+
+  return MoveResult(
+    grid: result,
+    moves: moves,
+    mergedCells: mergedCells,
+    gained: gained,
+  );
+}
 
 List<List<int>> _buildTravelLines(HexDirection dir) {
   // The "head" of each line — the cell furthest in the swipe direction with
