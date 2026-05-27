@@ -2,6 +2,10 @@
 // which is documented as mutating). Everything here is unit-tested.
 import 'dart:math';
 
+import 'move_result.dart';
+
+export 'move_result.dart' show MoveResult, TileMove;
+
 /// The board is a 4x4 grid.
 const int kGridSide = 4;
 const int kCellCount = kGridSide * kGridSide;
@@ -15,50 +19,6 @@ enum Direction { up, down, left, right }
 int cellRow(int index) => index ~/ kGridSide;
 int cellCol(int index) => index % kGridSide;
 int cellIndex(int row, int col) => row * kGridSide + col;
-
-/// One tile sliding from [from] to [to] during a move. [value] is the tile's
-/// value while it slides — its pre-merge value. [merging] is true when the
-/// tile slides into a merge and is then replaced by the doubled tile.
-class TileMove {
-  final int from;
-  final int to;
-  final int value;
-  final bool merging;
-
-  const TileMove({
-    required this.from,
-    required this.to,
-    required this.value,
-    required this.merging,
-  });
-}
-
-/// The outcome of applying a swipe: the new board plus everything an animation
-/// needs to play the move. Does not include the random tile that spawns after.
-class MoveResult {
-  /// The 16-cell grid after sliding and merging (0 = empty).
-  final List<int> grid;
-
-  /// Every tile that was on the board and where it travelled.
-  final List<TileMove> moves;
-
-  /// Cell indices that received a freshly merged (doubled) tile.
-  final List<int> mergedCells;
-
-  /// Points earned — the sum of every merged tile's new value.
-  final int gained;
-
-  const MoveResult({
-    required this.grid,
-    required this.moves,
-    required this.mergedCells,
-    required this.gained,
-  });
-
-  /// True when the swipe actually changed the board (a legal move).
-  bool get changed =>
-      mergedCells.isNotEmpty || moves.any((m) => m.from != m.to);
-}
 
 /// A fresh, empty grid.
 List<int> emptyGrid() => List<int>.filled(kCellCount, 0);
