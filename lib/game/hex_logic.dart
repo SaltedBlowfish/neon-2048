@@ -1,6 +1,7 @@
-// Pure hex-board logic for 2187 mode — no Flutter, no side effects (except
-// spawnHexTile, which is documented as mutating). Everything here is
+// Pure hex-board logic for 2187 mode — no Flutter. Everything here is
 // unit-tested.
+
+import 'dart:math';
 
 /// Side length of the hexagonal board, in cells from centre to a vertex.
 const int kHexSide = 3;
@@ -39,8 +40,8 @@ List<Axial> _enumerateCells() {
   const int side = kHexSide - 1; // 2
   final cells = <Axial>[];
   for (var r = -side; r <= side; r++) {
-    final qMin = -side > -side - r ? -side : -side - r;
-    final qMax = side < side - r ? side : side - r;
+    final qMin = max(-side, -side - r);
+    final qMax = min(side, side - r);
     for (var q = qMin; q <= qMax; q++) {
       cells.add(Axial(q, r));
     }
