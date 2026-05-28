@@ -38,4 +38,4 @@ Keep `game_logic.dart` as the 2048-mode implementation. Add a new `hex_logic.dar
 
 - The slide-merge loop in `applyMove` will appear twice in slightly different forms. Acceptable: the loops differ in their travel-line generation and merge-multiplier constants, so the apparent duplication is shallower than it looks.
 - If a third mode is ever added, the duplication cost will start to outweigh the abstraction cost — revisit this ADR.
-- `GameScreen` carries mode-aware branching. Encapsulate that branching behind a single mode-router rather than scattering `if (mode == X)` throughout the widget tree.
+- `GameScreen` currently carries mode-aware branching at several call sites (`_startNewGame`, `_moveSquare`/`_moveHex`, `_settleMove`, `_handleKey`, `_handlePanEnd`, `_buildLayout`). Two modes makes this readable; if a third mode is ever added, extract a single mode-router so branching lives in one place rather than scattering further.

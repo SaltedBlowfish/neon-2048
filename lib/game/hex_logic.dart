@@ -13,14 +13,8 @@ const int kHexSide = 3;
 /// formula 3·n·(n-1) + 1 for a hexagon of side n.
 const int kHexCellCount = 3 * kHexSide * (kHexSide - 1) + 1; // 19
 
-/// Reaching a tile of this value wins the game.
-const int kHex2187WinValue = 2187;
-
 /// Multiplier applied on each pair-merge in 2187 mode.
 const int kHex2187Multiplier = 3;
-
-/// Values that can appear when a new tile spawns in 2187 mode.
-const List<int> kHex2187SpawnValues = [3, 9];
 
 /// An axial hex coordinate. Equivalent to cube coords (q, r, s) with s = -q-r.
 class Axial {

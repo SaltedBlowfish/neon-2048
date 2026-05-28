@@ -336,7 +336,7 @@ class _GameScreenState extends State<GameScreen>
   void _handlePanEnd(DragEndDetails details) {
     final drag = _dragAccum;
     if (_mode == GameMode.mode2048) {
-      if (drag.distance < 18) return;
+      if (drag.distance < minSwipeDistance) return;
       if (drag.dx.abs() > drag.dy.abs()) {
         _moveSquare(drag.dx > 0 ? Direction.right : Direction.left);
       } else {

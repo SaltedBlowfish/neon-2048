@@ -21,12 +21,7 @@ class HexBoardMetrics {
   /// are `cellSize` pixels above and below the cell centre.
   final double cellSize;
 
-  /// Padding from the board edge to the outermost cell vertex.
-  final double pad;
-
-  HexBoardMetrics(this.size)
-      : pad = size * _padFraction,
-        cellSize = _cellSizeFor(size);
+  HexBoardMetrics(this.size) : cellSize = _cellSizeFor(size);
 
   /// Side-3 hexagon fits inside a square of side `(2·kHexSide - 1)·√3·cellSize`
   /// wide and `(3·kHexSide - 1)·cellSize` tall (for `kHexSide = 3`: ≈8.66·cell
@@ -54,7 +49,7 @@ class HexBoardMetrics {
 /// y axis flipped so up is positive, matching math convention), then pick the
 /// direction whose canonical angle is within 30° of the swipe.
 HexDirection? directionFromSwipe(Offset delta) {
-  if (delta.distance < _minSwipeDistance) return null;
+  if (delta.distance < minSwipeDistance) return null;
   // Flip y so positive is up (math convention).
   final angle = atan2(-delta.dy, delta.dx);
   // Nudge into [0, 2π).
@@ -82,4 +77,4 @@ HexDirection? directionFromSwipe(Offset delta) {
   return directions[index];
 }
 
-const double _minSwipeDistance = 18;
+const double minSwipeDistance = 18;
