@@ -62,13 +62,12 @@ class _ModeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2048 uses the cyan brand colour; 2187 uses a hot pink (one of the bright
-    // entries from the red ramp) so the title hints at the mode's palette.
-    final color = mode == GameMode.mode2048
-        ? NeonTheme.neon
-        : const Color(0xFFFF5AC8);
+    final color =
+        mode == GameMode.mode2048 ? NeonTheme.neon : NeonTheme.neon2187;
     return Semantics(
-      label: 'Switch to ${mode.label} mode',
+      label: active
+          ? '${mode.label} mode, selected'
+          : 'Switch to ${mode.label} mode',
       button: true,
       selected: active,
       child: GestureDetector(

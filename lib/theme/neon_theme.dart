@@ -21,6 +21,7 @@ class NeonTheme {
   static const Color neonDim = Color(0xFF14546A); // resting grid lines
   static const Color neonDeep = Color(0xFF2C7CD6); // electric blue
   static const Color neonHot = Color(0xFFEAFBFF); // white-hot accents
+  static const Color neon2187 = Color(0xFFFF5AC8); // hot pink — 2187 brand accent
   static const Color danger = Color(0xFFFF4D6D); // game-over accent
   static const Color textDim = Color(0xFF6F93A6);
 
