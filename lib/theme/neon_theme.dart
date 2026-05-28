@@ -64,9 +64,9 @@ class NeonTheme {
     }
   }
 
-  // Red ramp for 2187 mode. Crimson at the low end → hot pink at the top.
-  // Kept distinct from the `danger` accent so the game-over banner remains
-  // visually separable.
+  /// Red ramp for 2187 mode. Crimson at the low end → hot pink at the top.
+  /// Kept distinct from the `danger` accent so the game-over banner remains
+  /// visually separable.
   static TileStyle _styleFor2187(int value) {
     switch (value) {
       case 3:
