@@ -7,7 +7,7 @@ import '../theme/neon_theme.dart';
 import 'hex_board_metrics.dart';
 
 /// Paints the hex-board chrome: dark backdrop, the 19 empty hex cell slots,
-/// a neon frame that breathes, and light streaks orbiting the perimeter.
+/// and a neon frame that breathes.
 class HexGridPainter extends CustomPainter {
   final HexBoardMetrics metrics;
   final Animation<double> ambient;
