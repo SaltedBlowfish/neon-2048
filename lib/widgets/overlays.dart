@@ -201,15 +201,17 @@ class GameOverOverlay extends StatelessWidget {
   }
 }
 
-/// Shown once the player first reaches a 2048 tile.
+/// Shown once the player first reaches the active mode's win value.
 class WinOverlay extends StatelessWidget {
   final int score;
+  final int winValue;
   final VoidCallback onKeepPlaying;
   final VoidCallback onNewGame;
 
   const WinOverlay({
     super.key,
     required this.score,
+    required this.winValue,
     required this.onKeepPlaying,
     required this.onNewGame,
   });
@@ -220,7 +222,7 @@ class WinOverlay extends StatelessWidget {
       child: _Panel(
         accent: NeonTheme.neon,
         children: [
-          _title('2048', NeonTheme.neon, size: 54),
+          _title(winValue.toString(), NeonTheme.neon, size: 54),
           const SizedBox(height: 4),
           _caption('SYSTEM ONLINE'),
           const SizedBox(height: 20),
