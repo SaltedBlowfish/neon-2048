@@ -12,6 +12,8 @@ import '../game/hex_logic.dart';
 /// is then translated so cell (0, 0) sits at the centre of a `size × size`
 /// square board.
 class HexBoardMetrics {
+  static const double _padFraction = 0.06;
+
   /// Side length of the board square in pixels.
   final double size;
 
@@ -23,7 +25,7 @@ class HexBoardMetrics {
   final double pad;
 
   HexBoardMetrics(this.size)
-      : pad = size * 0.06,
+      : pad = size * _padFraction,
         cellSize = _cellSizeFor(size);
 
   /// Side-3 hexagon fits inside a square of side `(2·kHexSide - 1)·√3·cellSize`
@@ -31,7 +33,7 @@ class HexBoardMetrics {
   /// wide, 8·cell tall). Pick the cell size that makes the wider dimension fit
   /// within `size - 2·pad`.
   static double _cellSizeFor(double boardSize) {
-    final usable = boardSize - 2 * (boardSize * 0.06);
+    final usable = boardSize - 2 * (boardSize * _padFraction);
     final maxByHeight = usable / 8.0;
     final maxByWidth = usable / (5 * sqrt(3));
     return maxByHeight < maxByWidth ? maxByHeight : maxByWidth;
