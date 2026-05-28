@@ -261,6 +261,8 @@ class _GameScreenState extends State<GameScreen>
   /// Runs when a move animation finishes: freeze the tiles and check the
   /// win / game-over conditions.
   void _settleMove() {
+    bool justWon;
+    bool isOver;
     if (_mode == GameMode.mode2048) {
       final settled = <Tile>[];
       for (var i = 0; i < kCellCount; i++) {
@@ -268,21 +270,13 @@ class _GameScreenState extends State<GameScreen>
           settled.add(_squareCellTile(_grid[i], i, TileSpawn.slide));
         }
       }
-      final justWon =
-          !_reachedWin && highestTile(_grid) >= _mode.winValue;
-      final isOver = !canMove(_grid);
-
+      justWon = !_reachedWin && highestTile(_grid) >= _mode.winValue;
+      isOver = !canMove(_grid);
       setState(() {
         _squareTiles = settled;
         if (justWon) _reachedWin = true;
         if (isOver) _gameOver = true;
       });
-
-      if (justWon) HapticFeedback.mediumImpact();
-      if (isOver) {
-        HapticFeedback.heavyImpact();
-        _bankScore();
-      }
     } else {
       final settled = <HexTile>[];
       for (var i = 0; i < kHexCellCount; i++) {
@@ -290,21 +284,18 @@ class _GameScreenState extends State<GameScreen>
           settled.add(_hexCellTile(_grid[i], i, TileSpawn.slide));
         }
       }
-      final justWon =
-          !_reachedWin && highestHexTile(_grid) >= _mode.winValue;
-      final isOver = !canHexMove(_grid);
-
+      justWon = !_reachedWin && highestHexTile(_grid) >= _mode.winValue;
+      isOver = !canHexMove(_grid);
       setState(() {
         _hexTiles = settled;
         if (justWon) _reachedWin = true;
         if (isOver) _gameOver = true;
       });
-
-      if (justWon) HapticFeedback.mediumImpact();
-      if (isOver) {
-        HapticFeedback.heavyImpact();
-        _bankScore();
-      }
+    }
+    if (justWon) HapticFeedback.mediumImpact();
+    if (isOver) {
+      HapticFeedback.heavyImpact();
+      _bankScore();
     }
   }
 
@@ -337,6 +328,7 @@ class _GameScreenState extends State<GameScreen>
         _startNewGame();
       }
     } else {
+      // Hex is touch-primary; arrows have no defined direction mapping.
       if (key == LogicalKeyboardKey.keyR) _startNewGame();
     }
   }
@@ -394,8 +386,8 @@ class _GameScreenState extends State<GameScreen>
     await _modeService.save(newMode);
     if (!mounted) return;
     setState(() => _mode = newMode);
-    await _loadHighScores();
     _startNewGame();
+    await _loadHighScores();
   }
 
   @override
@@ -484,7 +476,7 @@ class _GameScreenState extends State<GameScreen>
                       tiles: _squareTiles,
                       move: _moveController,
                       ambient: _ambientController,
-                      mode: GameMode.mode2048,
+                      mode: _mode,
                     );
                   }
                   return HexBoardView(
