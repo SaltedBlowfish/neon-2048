@@ -62,6 +62,7 @@ class HexTileView extends StatelessWidget {
     required this.move,
   });
 
+  /// Fraction of the move animation spent sliding; the rest is for pops.
   static const double _slideEnd = 0.62;
 
   @override
@@ -194,6 +195,5 @@ class _HexTilePainter extends CustomPainter {
   bool shouldRepaint(covariant _HexTilePainter old) =>
       old.fill != fill ||
       old.edge != edge ||
-      old.glow != glow ||
       old.cellSize != cellSize;
 }
