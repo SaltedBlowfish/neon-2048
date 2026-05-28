@@ -46,3 +46,37 @@ class Tile {
         toCol = col.toDouble(),
         spawn = TileSpawn.slide;
 }
+
+/// A hex tile as drawn on screen for one move. Positions are fractional axial
+/// coordinates so the view can interpolate them into pixels.
+class HexTile {
+  final int id;
+  final int value;
+  final double fromQ;
+  final double fromR;
+  final double toQ;
+  final double toR;
+  final TileSpawn spawn;
+
+  const HexTile({
+    required this.id,
+    required this.value,
+    required this.fromQ,
+    required this.fromR,
+    required this.toQ,
+    required this.toR,
+    required this.spawn,
+  });
+
+  /// A tile sitting still in one cell — no animation.
+  HexTile.atRest({
+    required this.id,
+    required this.value,
+    required int q,
+    required int r,
+  })  : fromQ = q.toDouble(),
+        fromR = r.toDouble(),
+        toQ = q.toDouble(),
+        toR = r.toDouble(),
+        spawn = TileSpawn.slide;
+}
