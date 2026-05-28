@@ -1,8 +1,10 @@
 # Play Console — Neon 2048 submission packet
 
 Everything needed to click through the Play Console create-new-app flow.
-Generated assets are staged at `~/Desktop/neon-2048-play-assets/`. The
-release-signed AAB is at `~/Desktop/neon-2048-release.aab`.
+
+- **Generated assets:** `tool/store-assets/` (regenerate with `python3 tool/generate_store_assets.py`).
+- **Release-signed AAB:** `build/app/outputs/bundle/release/app-release.aab` (regenerate with `flutter build appbundle --release`).
+- **Release-signed APK** (for sideloading): `build/app/outputs/flutter-apk/app-release.apk` (regenerate with `flutter build apk --release`).
 
 ---
 
@@ -26,32 +28,39 @@ release-signed AAB is at `~/Desktop/neon-2048-release.aab`.
 
 ## Store listing copy
 
-### Short description (80 char max — uses 62)
+### Short description (80 char max — uses 76)
 
 ```
-Tile-merging on a neon grid. Slide, merge, double — to 2048.
+Two modes — classic 2048 on squares, plus 2187 on a neon hex grid.
 ```
 
 ### Full description (4000 char max)
 
 ```
-Slide tiles. Match equal values. Double them up. Reach 2048 — and keep going.
+Slide tiles. Match equal values. Reach the target — and keep going.
 
-Neon 2048 is a focused, single-screen take on the classic 4×4 puzzle, dressed in a neon palette: dim slate-blue 2s climb tile by tile toward a white-hot 2048, with animated slides, merge pops, and a breathing neon grid.
+Neon 2048 ships with two game modes, swapped from a single tap at the top of the screen:
+
+• 2048 — the classic 4×4 square grid. Swipe to slide, equal tiles merge by doubling (2 → 4 → 8 → … → 2048). Cyan tile palette that glows brighter as you climb.
+• 2187 — a fresh take on a pointy-top hexagonal grid (19 cells, six swipe directions). Tiles start at 3 and merge by tripling (3 → 9 → 27 → … → 2187). Red tile palette from crimson to hot pink.
+
+Both modes share the focused, single-screen design: animated slides, merge pops, a breathing neon frame, live SCORE and BEST panels, and a top-10 high-score table that's kept separately per mode and saved on your device. Your last-played mode is remembered between launches.
 
 WHAT'S IN THE BOX
-• Classic 4×4 2048 mechanics — swipe in any direction to slide and merge.
+• Two game modes (2048 and 2187), each with its own grid shape, merge rule, and tile palette.
+• Title-as-toggle: tap the inactive mode to switch — a confirm dialog protects an in-progress game.
+• Six-direction swipe input in hex mode resolved through 60° wedges.
 • Per-value tile palette — tiles glow brighter the further you climb.
 • Animated slides, merge pops, and tile spawn effects.
-• A breathing neon frame with two light streaks chasing each other around the board.
+• A breathing neon frame in the active mode's accent color.
 • Live SCORE and BEST panels. BEST is loaded from device storage and ticks up live.
-• Top 10 high-score table, saved on your device.
-• Game-over and win overlays with a "keep playing" option past 2048.
+• Top 10 high scores kept per mode.
+• Game-over and win overlays with a "keep playing" option past the win value.
 • Reset and high-scores buttons reachable any time.
 • Haptic feedback on every move.
 
 PRIVATE BY DESIGN
-Neon 2048 is fully offline. It does not collect any data, contact any server, or include any advertising or analytics SDKs. Your high-score table never leaves your device.
+Neon 2048 is fully offline. It does not collect any data, contact any server, or include any advertising or analytics SDKs. Your high-score tables never leave your device.
 
 OPEN SOURCE
 Neon 2048 is MIT-licensed. The full source code and build instructions live at
@@ -65,7 +74,7 @@ Built by Superstition Labs, LLC — Phoenix, Arizona.
 
 ---
 
-## Visual assets (all in `~/Desktop/neon-2048-play-assets/`)
+## Visual assets (all in `tool/store-assets/`)
 
 | Asset | Spec | File |
 |---|---|---|
@@ -75,13 +84,17 @@ Built by Superstition Labs, LLC — Phoenix, Arizona.
 | Phone screenshot 2 | 1350×2400 PNG (9:16) | `screenshot-2-gameplay.png` |
 | Phone screenshot 3 | 1350×2400 PNG (9:16) | `screenshot-3-high-scores.png` |
 | Phone screenshot 4 | 1080×1920 PNG (9:16) | `screenshot-4-promo.png` |
+| Phone screenshot 5 | 1080×1920 PNG (9:16) | `screenshot-5-promo-2187.png` |
 
-All four screenshots are exactly 9:16 and ≥1080 px on the short side, which
-satisfies the promotion eligibility rule: *"at least 4 screenshots, with at
-least 3 in 16:9 or 9:16 and at least 1080 px."* Screenshots 1–3 are real
-emulator captures padded with dark bars on the sides to reach 9:16 without
-cropping any UI; screenshot 4 is a synthetic portrait showing the tile
-palette climbing from 2 to 1024.
+All five screenshots are exactly 9:16 and ≥1080 px on the short side, which
+satisfies the promotion eligibility rule. Screenshots 1–3 are real emulator
+captures (2048 mode) padded with dark bars on the sides to reach 9:16 without
+cropping any UI. Screenshot 4 is a synthetic portrait showing the 2048
+palette climbing from 2 to 1024. Screenshot 5 is a synthetic portrait of
+2187 mode showing the hex board with the red palette from 3 to 729 and the
+title-toggle highlighting 2187.
+
+Re-generate any time via `python3 tool/generate_store_assets.py`.
 
 ---
 
@@ -154,9 +167,9 @@ k) **Privacy policy** (under App content → Privacy policy)
    key and re-signs your uploads. (Your upload key is the one in
    `~/keystores/neon-2048-upload.jks`. Password in
    `android/key.properties` and `~/keystores/neon-2048-upload.password.txt`.)
-2. **App bundles:** upload `~/Desktop/neon-2048-release.aab`.
-3. **Release name:** `1.0.0` (auto from `versionName`).
-4. **Release notes (en-US):** `First release.`
+2. **App bundles:** upload `build/app/outputs/bundle/release/app-release.aab`.
+3. **Release name:** auto from `versionName` in `pubspec.yaml`.
+4. **Release notes (en-US):** paste from the per-version "Release notes" section at the bottom of this doc.
 5. **Next**, review, then **Save** (don't roll out yet).
 
 ### Step 5 — Countries / regions
@@ -173,8 +186,8 @@ First reviews for new apps typically take 1–7 days.
 
 ## After the first publish
 
-- **Update flow:** bump `version: 1.0.0+1` in `pubspec.yaml` (the `+1` is
-  the versionCode — must increase each release), then rebuild:
+- **Update flow:** bump `version` in `pubspec.yaml` (the `+N` suffix is the
+  versionCode — must increase each release), then rebuild:
   ```bash
   flutter build appbundle --release
   ```
@@ -184,3 +197,22 @@ First reviews for new apps typically take 1–7 days.
   is the only key you need to keep. If it's ever lost, you can request a
   reset through Play Console (because Google holds the actual signing key).
   Back up `~/keystores/` to your password manager / encrypted storage.
+
+---
+
+## Release notes
+
+### v1.0.0 (initial release)
+
+```
+First release.
+```
+
+### v1.1.0 (adds 2187 hex mode)
+
+```
+New "2187" game mode — a pointy-top hexagonal grid (19 cells, six swipe
+directions) where tiles start at 3 and merge by tripling. Toggle between
+classic 2048 and 2187 from the new title tabs at the top. Each mode keeps
+its own top-10 high-score table; your last-played mode is remembered.
+```
